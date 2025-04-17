@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Smash Mods Übersicht</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+    h1 {
+      color: #444;
+    }
+    ul {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    li {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #ddd;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    #content {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Installierte Mods</h1>
+  <div id="content">
+    <ul id="modList">Lade Daten...</ul>
+  </div>
+
+  <script>
+    const password = "painpower";
+    const entered = prompt("Bitte Passwort eingeben:");
+
+    if (entered === password) {
+      document.getElementById("content").style.display = "block";
+
+      fetch('mods.json')
+        .then(res => res.json())
+        .then(data => {
+          const ul = document.getElementById('modList');
+          ul.innerHTML = '';
+
+          for (const characterKey in data) {
+            const character = data[characterKey];
+            const charName = character.display || characterKey;
+
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${charName}</strong><ul></ul>`;
+            const subList = li.querySelector('ul');
+
+            for (let slot = 0; slot <= 7; slot++) {
+              const slotName = `CR0${slot}`;
+              const modName = character[slotName];
+              if (modName) {
+                const subItem = document.createElement('li');
+                subItem.textContent = `${slotName}: ${modName}`;
+                subList.appendChild(subItem);
+              }
+            }
+
+            if (character["CR-All"] && character["CR-All"].length > 0) {
+              const crAllItem = document.createElement('li');
+              crAllItem.textContent = `CR-All: ${character["CR-All"].join(', ')}`;
+              subList.appendChild(crAllItem);
+            }
+
+            ul.appendChild(li);
+          }
+        })
+        .catch(err => {
+          document.getElementById('modList').textContent = 'Fehler beim Laden der Datei.';
+          console.error(err);
+        });
+
+    } else {
+      document.body.innerHTML = "<h2>Zugriff verweigert</h2>";
+    }
+  </script>
+</body>
+</html>
